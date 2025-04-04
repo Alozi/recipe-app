@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 
 const fetchRecipes = async (query, cuisine, maxReadyTime) => {
   const cacheKey = `${query}-${cuisine}-${maxReadyTime}`;
@@ -14,7 +15,7 @@ const fetchRecipes = async (query, cuisine, maxReadyTime) => {
   const res = await fetch(
     `https://api.spoonacular.com/recipes/complexSearch?query=${query}&cuisine=${cuisine}&maxReadyTime=${maxReadyTime}&apiKey=${process.env.NEXT_PUBLIC_SPOONACULAR_API_KEY}`
   );
-  
+
   data = await res.json();
 
   cache[cacheKey] = {
@@ -53,14 +54,19 @@ export default async function RecipesPage({ searchParams }) {
           <p>No recipes found.</p>
         ) : (
           recipes.map((recipe) => (
-            <div key={recipe.id} className="border p-4 rounded-lg">
-              <h3 className="font-semibold">{recipe.title}</h3>
-              <img
-                src={recipe.image}
-                alt={recipe.title}
-                className="w-full h-48 object-cover rounded mt-2"
-              />
-            </div>
+            <Link
+              key={recipe.id}
+              href={`/recipes/${recipe.id}`}
+            >
+              <div key={recipe.id} className="border p-4 rounded-lg">
+                <h3 className="font-semibold">{recipe.title}</h3>
+                <img
+                  src={recipe.image}
+                  alt={recipe.title}
+                  className="w-full h-48 object-cover rounded mt-2"
+                />
+              </div>
+            </Link>
           ))
         )}
       </div>
