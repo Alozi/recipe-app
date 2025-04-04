@@ -1,6 +1,15 @@
 import Image from "next/image";
+import dynamic from 'next/dynamic';
 
-import SearchForm from '../components/SearchForm.jsx';
+import { Suspense } from 'react';
+
+// import SearchForm from '../components/SearchForm.jsx';
+
+const SearchForm = dynamic(() => {
+  return new Promise(resolve => {
+    setTimeout(() => resolve(import('../components/SearchForm.jsx')), 3000);
+  });
+}, { suspense: true });
 
 export default function Home() {
   console.log('app');
@@ -18,7 +27,9 @@ export default function Home() {
           priority
         />
 
-        <SearchForm />
+        <Suspense fallback={<p className="text-blue-500">Loading slow component...</p>}>
+          <SearchForm />
+        </Suspense>
       </main>
       <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
         Created by

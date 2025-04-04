@@ -1,6 +1,8 @@
 import React from "react";
 import Link from "next/link";
 
+import { Suspense } from "react";
+
 const fetchRecipes = async (query, cuisine, maxReadyTime) => {
   const cacheKey = `${query}-${cuisine}-${maxReadyTime}`;
   const cache = globalThis.cache || {};
@@ -27,6 +29,31 @@ const fetchRecipes = async (query, cuisine, maxReadyTime) => {
   globalThis.cache = cache;
 
   return data.results;
+};
+
+const RecipeList = async ({ query, cuisine, prepTime }) => {
+  const recipes = await fetchRecipes(query, cuisine, prepTime);
+
+  if (!recipes || recipes.length === 0) {
+    return <p>No recipes found.</p>;
+  }
+
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-4">
+      {recipes.map((recipe) => (
+        <Link key={recipe.id} href={`/recipes/${recipe.id}`}>
+          <div className="border p-4 rounded-lg">
+            <h3 className="font-semibold">{recipe.title}</h3>
+            <img
+              src={recipe.image}
+              alt={recipe.title}
+              className="w-full h-48 object-cover rounded mt-2"
+            />
+          </div>
+        </Link>
+      ))}
+    </div>
+  );
 };
 
 export default async function RecipesPage({ searchParams }) {
@@ -63,24 +90,9 @@ export default async function RecipesPage({ searchParams }) {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-4">
-        {recipes.length === 0 ? (
-          <p>No recipes found.</p>
-        ) : (
-          recipes.map((recipe) => (
-            <Link key={recipe.id} href={`/recipes/${recipe.id}`}>
-              <div key={recipe.id} className="border p-4 rounded-lg">
-                <h3 className="font-semibold">{recipe.title}</h3>
-                <img
-                  src={recipe.image}
-                  alt={recipe.title}
-                  className="w-full h-48 object-cover rounded mt-2"
-                />
-              </div>
-            </Link>
-          ))
-        )}
-      </div>
+      <Suspense fallback={<p>Loading recipes...</p>}>
+        <RecipeList query={query} cuisine={cuisine} prepTime={prepTime} />
+      </Suspense>
     </div>
   );
 }
