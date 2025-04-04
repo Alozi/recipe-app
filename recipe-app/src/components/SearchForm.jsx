@@ -10,7 +10,7 @@ export default function RecipeSearchForm() {
   const [cuisine, setCuisine] = useState("");
   const [prepTime, setPrepTime] = useState("");
 
-  const isFormEmpty = !query || !cuisine || !prepTime;
+  const isFormEmpty = !query && !cuisine && !prepTime;
 
   const handleSubmit = (e) => {
     e.preventDefault();

@@ -6,6 +6,18 @@ export default async function RecipeDetail({ params }) {
   const res = await fetch(
     `https://api.spoonacular.com/recipes/${id}/information?apiKey=${process.env.NEXT_PUBLIC_SPOONACULAR_API_KEY}`
   );
+
+  if (!res.ok) {
+    return (
+      <div className="p-6">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative max-w-xl mx-auto">
+          <strong className="font-bold">Error:</strong>
+          <span className="block sm:inline ml-2">Failed to fetch recipe</span>
+        </div>
+      </div>
+    );
+  }
+
   const recipe = await res.json();
 
   return (
@@ -21,7 +33,7 @@ export default async function RecipeDetail({ params }) {
       <div className="mt-4">
         <h3 className="font-semibold">Ingredients:</h3>
         <ul>
-          {recipe.extendedIngredients.map((ingredient, index) => (
+          {recipe.extendedIngredients?.map((ingredient, index) => (
             <li key={index}>{ingredient.original}</li>
           ))}
         </ul>

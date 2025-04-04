@@ -5,9 +5,6 @@ const fetchRecipes = async (query, cuisine, maxReadyTime) => {
   const cacheKey = `${query}-${cuisine}-${maxReadyTime}`;
   const cache = globalThis.cache || {};
 
-  let data = [];
-  let error = null;
-
   if (cache[cacheKey] && Date.now() - cache[cacheKey].timestamp < 60000) {
     return cache[cacheKey].data;
   }
@@ -16,7 +13,11 @@ const fetchRecipes = async (query, cuisine, maxReadyTime) => {
     `https://api.spoonacular.com/recipes/complexSearch?query=${query}&cuisine=${cuisine}&maxReadyTime=${maxReadyTime}&apiKey=${process.env.NEXT_PUBLIC_SPOONACULAR_API_KEY}`
   );
 
-  data = await res.json();
+  if (!res.ok) {
+    return "Failed to fetch recipes";
+  }
+
+  const data = await res.json();
 
   cache[cacheKey] = {
     data: data.results,
@@ -32,6 +33,19 @@ export default async function RecipesPage({ searchParams }) {
   const { query = "", cuisine = "", prepTime = "" } = await searchParams;
 
   const recipes = await fetchRecipes(query, cuisine, prepTime);
+
+  if (typeof recipes === "string") {
+    return (
+      <div className="p-6">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative max-w-xl mx-auto">
+          <strong className="font-bold">Error:</strong>
+          <span className="block sm:inline ml-2">
+            {recipes}. Please try again later or use correct info.
+          </span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6">
@@ -54,10 +68,7 @@ export default async function RecipesPage({ searchParams }) {
           <p>No recipes found.</p>
         ) : (
           recipes.map((recipe) => (
-            <Link
-              key={recipe.id}
-              href={`/recipes/${recipe.id}`}
-            >
+            <Link key={recipe.id} href={`/recipes/${recipe.id}`}>
               <div key={recipe.id} className="border p-4 rounded-lg">
                 <h3 className="font-semibold">{recipe.title}</h3>
                 <img
