@@ -1,6 +1,8 @@
-# the Recipe Finder App
+# The Recipe Finder App
 
 Front-end JS engineer test assessment - the Recipe Finder App
+
+![Screenshot with game](/public/screencapture.png)
 
 ## Run this project:
 
